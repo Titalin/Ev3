@@ -1,1 +1,29 @@
-import { Component } from '@angular/core';import { FormsModule } from '@angular/forms';import { CommonModule } from '@angular/common';import { Router } from '@angular/router';import { AuthService } from '../core/auth.service';@Component({standalone:true,imports:[FormsModule,CommonModule],template:`<main class="login-wrap"><section class="login-card"><div class="logo">AA</div><p class="eyebrow">SISTEMA ADMINISTRATIVO</p><h1>Bienvenido</h1><p class="muted">Inicia sesión para administrar divisiones y programas educativos.</p><form (ngSubmit)="submit()"><label>Usuario<input name="username" [(ngModel)]="username" autocomplete="username" required></label><label>Contraseña<input name="password" [(ngModel)]="password" type="password" autocomplete="current-password" required></label><p class="error" *ngIf="error">{{error}}</p><button [disabled]="loading">{{loading?'Validando…':'Iniciar sesión'}}</button></form><p class="hint">Cuenta inicial configurable mediante APP_ADMIN_USER y APP_ADMIN_PASSWORD en RATE.</p></section></main>`,styles:[]})export class LoginComponent{username='';password='';error='';loading=false;constructor(private auth:AuthService,private router:Router){}submit(){this.error='';this.loading=true;this.auth.login(this.username,this.password).subscribe({next:()=>this.router.navigateByUrl('/'),error:()=>{this.error='Usuario o contraseña incorrectos. Verifica que RATE esté ejecutándose.';this.loading=false;},complete:()=>this.loading=false});}}
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../core/auth.service';
+
+@Component({
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+<main class="login-wrap">
+  <section class="login-card">
+    <h1>Sistema Académico</h1>
+    <p class="muted">Inicia sesión para administrar divisiones y programas educativos.</p>
+    <p class="error" *ngIf="error">{{error}}</p>
+    <button (click)="login()">Iniciar sesión</button>
+  </section>
+</main>`,
+  styles: []
+})
+export class LoginComponent {
+  error = '';
+  constructor(private auth: AuthService) {}
+  login() {
+    this.error = '';
+    this.auth.login().catch(e => {
+      this.error = e?.message || 'Error al iniciar sesión.';
+      console.error(e);
+    });
+  }
+}

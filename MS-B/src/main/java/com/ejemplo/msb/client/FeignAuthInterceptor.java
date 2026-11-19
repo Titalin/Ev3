@@ -1,3 +1,25 @@
 package com.ejemplo.msb.client;
-import feign.RequestInterceptor; import feign.RequestTemplate; import org.springframework.context.annotation.Bean; import org.springframework.context.annotation.Configuration; import org.springframework.web.context.request.RequestContextHolder; import org.springframework.web.context.request.ServletRequestAttributes;
-@Configuration public class FeignAuthInterceptor { @Bean RequestInterceptor forwardAuthorization(){return template->{var attrs=(ServletRequestAttributes)RequestContextHolder.getRequestAttributes(); if(attrs!=null){String header=attrs.getRequest().getHeader("Authorization");if(header!=null)template.header("Authorization",header);}};} }
+
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
+
+/**
+ * Propaga el JWT del usuario a las llamadas Feign (MS-B -> MS-A).
+ * El token ya fue validado por el Resource Server, así que el MS destino
+ * vuelve a validarlo con el mismo issuer.
+ */
+@Component
+public class FeignAuthInterceptor implements RequestInterceptor {
+
+    @Override
+    public void apply(RequestTemplate template) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof JwtAuthenticationToken jwtAuth) {
+            template.header("Authorization", "Bearer " + jwtAuth.getToken().getTokenValue());
+        }
+    }
+}

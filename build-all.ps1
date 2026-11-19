@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$projects = @("Eurekeando/eureka", "MS-A", "MS-B", "rate")
+$projects = @("Eurekeando/eureka", "auth-server", "MS-A", "MS-B", "rate")
 foreach ($project in $projects) {
     Write-Host "Building $project ..." -ForegroundColor Cyan
     Push-Location (Join-Path $root $project)
